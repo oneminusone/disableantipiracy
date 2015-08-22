@@ -41,7 +41,7 @@ public class DisableContentGuard implements IXposedHookLoadPackage {
 
     @Override
     public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
-        Class installReceiver, notifyService;
+        Class installReceiver, notifyService, constants;
 
         /* Intercept AntiPiracy */
         if (lpparam.packageName.equals("com.android.settings")) {
@@ -49,10 +49,14 @@ public class DisableContentGuard implements IXposedHookLoadPackage {
                 try {
                     installReceiver = findClass("org.antipiracy.support.ContentGuardInstallReceiver", lpparam.classLoader);
                     notifyService = findClass("org.antipiracy.support.ContentGuardNotifyService", lpparam.classLoader);
+                    constants = findClass("org.antipiracy.support.utils.ContentGuardConstants", lpparam.classLoader);
                 } catch (ClassNotFoundError e) {
                     installReceiver = findClass("org.antipiracy.support.AntiPiracyInstallReceiver", lpparam.classLoader);
                     notifyService = findClass("org.antipiracy.support.AntiPiracyNotifyService", lpparam.classLoader);
+                    constants = findClass("org.antipiracy.support.utils.AntiPiracyConstants", lpparam.classLoader);
                 }
+                
+                setStaticObjectField(constants, "PACKAGES", null);
 
                 findAndHookMethod(installReceiver, "onReceive", Context.class, Intent.class, new XC_MethodHook() {
                     @Override
